@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
     private Button start;
     private ObjectAnimator animator;
     boolean playing =false;
+    int duration = 3600;
+    private float f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,15 +32,22 @@ public class MainActivity extends AppCompatActivity {
         tv_show = (TextView) findViewById(R.id.tv_show);
         start = (Button) findViewById(R.id.start);
         animator = ObjectAnimator.ofFloat(iv, "rotation", 0, 360);
-        animator.setInterpolator(new LinearInterpolator());//设置匀速旋转
+        animator.setInterpolator(new Interpolator() {//自定义插值器
+            @Override
+            public float getInterpolation(float v) {
+                if(playing){
+                    f = v;
+                }
+                return f;
+            }
+        });
         animator.setRepeatCount(ObjectAnimator.INFINITE);
         animator.setRepeatMode(ObjectAnimator.RESTART);
-        animator.setDuration(1000);//控制旋转速度
+        animator.setDuration(duration);//控制旋转速度
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float value = (float) valueAnimator.getAnimatedValue();
-                Log.i("fengao", "onAnimationUpdate: " + value);
                 tv_show.setText("转动角度： "+value);
             }
         });
@@ -47,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (playing) {
                     start.setText("开始");
-                    animator.pause();
                 } else {
                     start.setText("停止");
                     animator.start();
